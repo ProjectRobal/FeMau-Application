@@ -13,44 +13,30 @@ Window {
         bold: true
     })
 
-    width: 640
-    height: 480
+    width: 800
+    height: 600
     visible: true
-    title: qsTr("Hello World")
+    title: "FeMau Application"
 
-
-        // ChartView {
-        //     anchors.fill:parent
-
-        //     antialiasing: true
-
-        //     LineSeries {
-        //         name: "Temperature"
-        //         XYPoint { x: 0; y: 0 }
-        //         XYPoint { x: 1.1; y: 2.1 }
-        //         XYPoint { x: 1.9; y: 3.3 }
-        //         XYPoint { x: 2.1; y: 2.1 }
-        //         XYPoint { x: 2.9; y: 4.9 }
-        //         XYPoint { x: 3.4; y: 3.0 }
-        //         XYPoint { x: 4.1; y: 3.3 }
-        //     }
-        // }
     GridLayout
     {
         id:root
         columns:4
+
         anchors.fill:parent.fill
         width: parent.width
         height: parent.height
 
         ColumnLayout
         {
-            Layout.columnSpan: 2
-            Layout.column: 1
-            Layout.fillWidth: true
-            anchors.top: parent.top
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.columnSpan: 1
+            Layout.column: 3
+            // Layout.fillWidth: true
+            // Layout.fillHeight: true
+
+            Layout.alignment: Qt.AlignTop
+
+            Layout.margins: 10
 
             RowLayout
             {
@@ -58,7 +44,7 @@ Window {
                 Layout.bottomMargin: 10
 
                 Text {
-                    text: qsTr("Temperature:")
+                    text: "Temperature:"
                     font: defFont
                     // Layout.fillWidth: true
                     // Layout.fillHeight: true
@@ -66,8 +52,8 @@ Window {
 
                 Text {
                     id: temperature
-                    text: qsTr("0 °C")
-                    Layout.fillWidth: true
+                    text: "0 °C"
+                    // Layout.fillWidth: true
                     font: defFont
                     // Layout.fillHeight: true
                 }
@@ -79,7 +65,7 @@ Window {
                 Layout.bottomMargin: 10
 
                 Text {
-                    text: qsTr("Power:")
+                    text: "Power:"
                     font: defFont
                     // Layout.fillWidth: true
                     // Layout.fillHeight: true
@@ -88,9 +74,9 @@ Window {
                 Text {
                     width:parent.width
                     id: power
-                    text: qsTr("0 %")
+                    text: "0 %"
                     font: defFont
-                    Layout.fillWidth: true
+                    // Layout.fillWidth: true
                     // Layout.fillHeight: true
                 }
             }
@@ -101,7 +87,7 @@ Window {
                 Layout.bottomMargin: 10
 
                 Text {
-                    text: qsTr("PID:")
+                    text: "PID:"
                     font: defFont
                     // Layout.fillWidth: true
                     // Layout.fillHeight: true
@@ -153,7 +139,7 @@ Window {
                 SpinBox
                 {
                     id: set_temperature_val
-                    Layout.fillWidth: false
+                    // Layout.fillWidth: false
                     from: 0
                     to: 300
                     editable: true
@@ -172,33 +158,59 @@ Window {
 
         ColumnLayout
         {
-            Layout.columnSpan: 2
-            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            // Layout.fillWidth: true
+            // Layout.fillHeight: true
             Layout.column: 0
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.margins: 10
+
+            ChartView {
+
+                id: chart
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                anchors.fill:parent.fill
+
+                antialiasing: true
+
+                LineSeries {
+                    name: "Temperature"
+                    XYPoint { x: 0; y: 0 }
+                    XYPoint { x: 1.1; y: 2.1 }
+                    XYPoint { x: 1.9; y: 3.3 }
+                    XYPoint { x: 2.1; y: 2.1 }
+                    XYPoint { x: 2.9; y: 4.9 }
+                    XYPoint { x: 3.4; y: 3.0 }
+                    XYPoint { x: 4.1; y: 3.3 }
+                }
+            }
 
             RowLayout
             {
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
                 Button
                 {
                     id: reset_chart
                     text: "Reset"
+                    font: defFont
                 }
 
                 Button
                 {
                     id: save_chart
                     text: "Save"
+                    font: defFont
                 }
 
                 Button
                 {
                     id: mode_select
                     text: "Automatic"
+                    font: defFont
                 }
             }
         }
