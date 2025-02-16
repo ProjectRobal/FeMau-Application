@@ -153,6 +153,94 @@ Window {
                     font: defFont
                 }
             }
+
+            RowLayout
+            {
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+
+                Button
+                {
+                    id: refresh_serial
+                    objectName: "RefreshSerial"
+                    text: "Refresh"
+                    font: defFont
+
+                    signal refreshSerial()
+
+                    onClicked: serial.scan_for_serial()
+                }
+
+                Button
+                {
+                    id: connect_serial
+                    text: "Connect"
+                    font: defFont
+
+                    signal connectToSerial()
+
+                    onClicked: connect_serial.connectToSerial()
+                }
+
+                ComboBox {
+                    currentIndex: 0
+                    font: defFont
+
+                    id: serial_select
+
+                    model: ["1","2"]
+                    width: 200
+
+                    signal serialSelected(id: int )
+
+                    onCurrentIndexChanged: serial_select.serialSelected( serial_select.currentIndex )
+
+                    Connections
+                    {
+                        target: serial
+                        function onUpdateList(dev_list: list)
+                        {
+                            serial_select.model = dev_list
+                        }
+                    }
+
+                }
+            }
+
+            RowLayout
+            {
+                id: serial_connection_status
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+
+                Connections
+                {
+                    function onConnected()
+                    {
+                        serial_status.text = "Connected"
+                        serial_status.color = "green"
+                    }
+
+                    function onDisconnected()
+                    {
+                        serial_status.text = "Disconnected"
+                        serial_status.color = "red"
+                    }
+                }
+
+                Text {
+                    text: "Status:"
+                    font: defFont
+                }
+
+                Text {
+                    id: serial_status
+
+                    text: "Disconnected"
+                    font: defFont
+                    color: "red"
+                }
+            }
         }
 
 
@@ -189,6 +277,8 @@ Window {
 
                 LineSeries {
                     name: "Temperature"
+
+                    id: temperature_series
 
                     axisX: axisX
                     axisY: axisY
