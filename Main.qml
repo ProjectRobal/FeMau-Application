@@ -174,8 +174,25 @@ Window {
 
                 antialiasing: true
 
+
+                ValueAxis
+                {
+                    id: axisY
+                    titleText:"Temperature [&deg;C]"
+                }
+
+                ValueAxis
+                {
+                    id: axisX
+                    titleText:"Time [s]"
+                }
+
                 LineSeries {
                     name: "Temperature"
+
+                    axisX: axisX
+                    axisY: axisY
+
                     XYPoint { x: 0; y: 0 }
                     XYPoint { x: 1.1; y: 2.1 }
                     XYPoint { x: 1.9; y: 3.3 }
