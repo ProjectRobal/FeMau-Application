@@ -108,14 +108,6 @@ Window {
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10
 
-                // PID
-                // {
-                //     // id: pid
-                //     p:1000
-                //     i:0
-                //     d:0
-                // }
-
                 Text {
                     text: "PID:"
                     font: defFont
@@ -392,7 +384,6 @@ Window {
                 title: "File error"
                 text: "Cannot open file for saving!"
                 onAccepted: {
-                    console.log("And of course you could only agree.")
                     visible = false
                 }
 
@@ -411,11 +402,22 @@ Window {
                     fileMode: FileDialog.SaveFile
                     onAccepted: function()
                     {
-                        let fileName = fileDialog.selectedFile;
+                        let fileName = fileDialog.selectedFile.toString().slice(7);
+
+                        console.log("File: "+fileName);
 
                         let series = chart.series(0);
 
-                        chart_tool.saveToFile(series,fileName);
+                        let text = "N,Time [ms],Temperature [°C]\n";
+
+                        for(let i=0;i<series.count;i++)
+                        {
+                            let point = series.at(i);
+
+                            text+=i+","+point.x+","+point.y+"\n";
+                        }
+
+                        chart_tool.saveToFile(text,fileName);
                     }
                 }
 

@@ -16,7 +16,7 @@ public:
 
 public slots:
 
-    void saveToFile(const QLineSeries& series,const QString& fileName);
+    void saveToFile(const QString& text,const QString& fileName);
 
 signals:
 
