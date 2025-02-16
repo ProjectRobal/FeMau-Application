@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QThread>
 
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
@@ -12,6 +13,7 @@
 
 #include <QDebug>
 
+#include "pid.h"
 
 class SerialInterface : public QObject
 {
@@ -26,11 +28,25 @@ class SerialInterface : public QObject
 
     bool connected;
 
+    bool checkDisconnected()
+    {
+        return ! this->connected;
+    }
+
+    bool checkConnected()
+    {
+        return this->connected;
+    }
+
+    void send_int(const char* header,int32_t value);
+
 public:
     explicit SerialInterface(QObject *parent = nullptr);
 
 
 public slots:
+
+    void set_pid(PID pid);
 
     void scan_for_serial();
 
@@ -40,6 +56,10 @@ public slots:
 
     void serial_data_ready();
 
+    void set_temperature(float temperature);
+
+    void set_power(float power);
+
     void on_serial_error(QSerialPort::SerialPortError error)
     {
         if( error == QSerialPort::SerialPortError::NoError )
@@ -48,6 +68,7 @@ public slots:
         }
 
         this->emitDisconnected();
+        this->connected = false;
 
         qDebug()<<"Serial error ocurred"<<error;
     }
@@ -59,16 +80,32 @@ public slots:
 
     void emitDisconnected()
     {
-        emit this->serialDisconcted();
+        emit this->serialDisconnected();
+    }
+
+    void onHelloMSG()
+    {
+        qDebug()<<"Got Hello message, devide is ready";
+        this->connected = true;
+        emit this->emitConnected();
+
+        // get current mode
+        this->serial.write("MG:\n");
+        QThread::msleep(500);
+        this->serial.write("PIDG:\n");
+        QThread::msleep(500);
+        this->serial.write("HSS:\n");
     }
 
 signals:
 
     void serialConnected();
 
-    void serialDisconcted();
+    void serialDisconnected();
 
     void updateList(const QList<QString>& dev_list);
+
+    void gotByte(char byte);
 };
 
 #endif // SERIALINTERFACE_H

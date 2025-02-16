@@ -122,9 +122,9 @@ void Console::process_message()
             return;
         }
 
-        pid.P = params[0];
-        pid.I = params[1];
-        pid.D = params[2];
+        pid.setP(params[0]);
+        pid.setI(params[1]);
+        pid.setD(params[2]);
 
         emit this->got_pid(pid);
 

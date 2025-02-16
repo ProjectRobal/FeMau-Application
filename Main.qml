@@ -2,8 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import QtCharts
 import QtQuick.Controls
+import QtQuick.Dialogs
 
-
+import qml.pid 1.0
 
 Window {
 
@@ -57,6 +58,16 @@ Window {
                     font: defFont
                     // Layout.fillHeight: true
                 }
+
+                Connections
+                {
+                    target: term
+
+                    function onGot_current_temperature(_temperature: float)
+                    {
+                        temperature.text = Math.floor(_temperature) + " °C";
+                    }
+                }
             }
 
             RowLayout
@@ -79,12 +90,31 @@ Window {
                     // Layout.fillWidth: true
                     // Layout.fillHeight: true
                 }
+
+                Connections
+                {
+                    target: term
+
+                    function onGot_power(_power: float)
+                    {
+                        power.text = Math.floor(_power) + " %";
+                    }
+                }
             }
 
             RowLayout
             {
+
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10
+
+                // PID
+                // {
+                //     // id: pid
+                //     p:1000
+                //     i:0
+                //     d:0
+                // }
 
                 Text {
                     text: "PID:"
@@ -98,8 +128,10 @@ Window {
                     id: propotional
                     Layout.fillWidth: false
                     from: 1
+                    to: 1000000
                     editable: true
                     font: defFont
+                    value: common.pid.p
                 }
 
                 SpinBox
@@ -107,8 +139,11 @@ Window {
                     id: integral
                     Layout.fillWidth: false
                     from: 0
+                    to: 1000000
                     editable: true
                     font: defFont
+                    value: common.pid.i
+
                 }
 
                 SpinBox
@@ -116,8 +151,21 @@ Window {
                     id: differential
                     Layout.fillWidth: false
                     from: 0
+                    to: 1000000
                     editable: true
                     font: defFont
+                    value: common.pid.d
+                }
+
+                Connections
+                {
+                    id: dupa
+                    target: term
+                    function onGot_pid(pid: PID)
+                    {
+                        common.pid = pid;
+                    }
+
                 }
             }
 
@@ -129,6 +177,12 @@ Window {
                 id:set_pid
                 text:"Set PID"
                 font: defFont
+
+
+                onClicked: function()
+                {
+                    serial.set_pid(common.pid)
+                }
             }
 
             RowLayout
@@ -151,6 +205,33 @@ Window {
                     id: set_temperature_button
                     text: "Set temperature"
                     font: defFont
+
+                    onClicked: serial.set_temperature(set_temperature_val.value)
+                }
+            }
+
+            RowLayout
+            {
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+
+                SpinBox
+                {
+                    id: set_power_val
+                    // Layout.fillWidth: false
+                    from: 0
+                    to: 100
+                    editable: true
+                    font: defFont
+                }
+
+                Button
+                {
+                    id: set_power_button
+                    text: "Set power"
+                    font: defFont
+
+                    onClicked: serial.set_power(set_power_val.value)
                 }
             }
 
@@ -162,11 +243,8 @@ Window {
                 Button
                 {
                     id: refresh_serial
-                    objectName: "RefreshSerial"
                     text: "Refresh"
                     font: defFont
-
-                    signal refreshSerial()
 
                     onClicked: serial.scan_for_serial()
                 }
@@ -255,6 +333,8 @@ Window {
 
                 id: chart
 
+                property int startTime: Date.now();
+
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 anchors.fill:parent.fill
@@ -271,11 +351,12 @@ Window {
                 ValueAxis
                 {
                     id: axisX
-                    titleText:"Time [s]"
+                    titleText:"Time [ms]"
                 }
 
                 LineSeries {
                     name: "Temperature"
+                    objectName:"temperatureSeries"
 
                     id: temperature_series
 
@@ -283,14 +364,60 @@ Window {
                     axisY: axisY
 
                     XYPoint { x: 0; y: 0 }
-                    XYPoint { x: 1.1; y: 2.1 }
-                    XYPoint { x: 1.9; y: 3.3 }
-                    XYPoint { x: 2.1; y: 2.1 }
-                    XYPoint { x: 2.9; y: 4.9 }
-                    XYPoint { x: 3.4; y: 3.0 }
-                    XYPoint { x: 4.1; y: 3.3 }
+                    XYPoint { x: 10; y: 20 }
+                }
+
+                Connections
+                {
+                    target: term
+
+                    function onGot_current_temperature(temperature: float)
+                    {
+                        let timestamp = Date.now() - chart.startTime;
+
+                        var series = chart.series(0);
+
+                        if( series.count > 100000 )
+                        {
+                            series.clear();
+                        }
+
+                        series.append(timestamp,temperature);
+                    }
                 }
             }
+
+            MessageDialog {
+                id: fileError
+                title: "File error"
+                text: "Cannot open file for saving!"
+                onAccepted: {
+                    console.log("And of course you could only agree.")
+                    visible = false
+                }
+
+                Connections
+                {
+                    target: chart_tool
+                    onFileError: fileError.visible = true
+                }
+
+            }
+
+            FileDialog {
+                    id: fileDialog
+                    // currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
+                    nameFilters: ["CSV files (*.csv)"]
+                    fileMode: FileDialog.SaveFile
+                    onAccepted: function()
+                    {
+                        let fileName = fileDialog.selectedFile;
+
+                        let series = chart.series(0);
+
+                        chart_tool.saveToFile(series,fileName);
+                    }
+                }
 
             RowLayout
             {
@@ -303,6 +430,13 @@ Window {
                     id: reset_chart
                     text: "Reset"
                     font: defFont
+
+                    onClicked: function()
+                    {
+                        var series = chart.series(0);
+
+                        series.clear();
+                    }
                 }
 
                 Button
@@ -310,6 +444,11 @@ Window {
                     id: save_chart
                     text: "Save"
                     font: defFont
+
+                    onClicked: function()
+                    {
+                        fileDialog.visible = true
+                    }
                 }
 
                 Button
@@ -317,6 +456,28 @@ Window {
                     id: mode_select
                     text: "Automatic"
                     font: defFont
+
+                    Connections
+                    {
+                        target: term
+
+                        function onGot_mode(mode: bool)
+                        {
+                            if( mode )
+                            {
+
+                                mode_select.text = "Automatic"
+
+                            }
+                            else
+                            {
+
+                                mode_select.text = "Manual"
+
+                            }
+
+                        }
+                    }
                 }
             }
         }

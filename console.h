@@ -2,14 +2,16 @@
 #define CONSOLE_H
 
 #include <QObject>
+#include <QQmlEngine>
 
-#include <common.h>
+#include <pid.h>
 
 #define BUFFER_SIZE 64
 
 class Console : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 
     char header[64];
     char value[64];
@@ -22,6 +24,7 @@ public:
     explicit Console(QObject *parent = nullptr);
 
     void process_message();
+
 
 public slots:
     void process(char byte);

@@ -4,7 +4,7 @@ project(FeMauApp VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Widgets SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Quick Widgets SerialPort Charts)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -19,7 +19,9 @@ qt_add_qml_module(appFeMauApp
         Main.qml
         SOURCES serialinterface.h serialinterface.cpp
         SOURCES console.h console.cpp
-        SOURCES common.h
+        SOURCES pid.h
+        SOURCES chart.h chart.cpp
+        SOURCES common.h common.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -34,7 +36,7 @@ set_target_properties(appFeMauApp PROPERTIES
 )
 
 target_link_libraries(appFeMauApp
-    PRIVATE Qt6::Quick Qt6::Widgets Qt6::SerialPort
+    PRIVATE Qt6::Quick Qt6::Widgets Qt6::SerialPort Qt6::Charts
 )
 
 include(GNUInstallDirs)
