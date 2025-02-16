@@ -18,6 +18,8 @@ qt_add_qml_module(appFeMauApp
     QML_FILES
         Main.qml
         SOURCES serialinterface.h serialinterface.cpp
+        SOURCES console.h console.cpp
+        SOURCES common.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

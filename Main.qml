@@ -179,7 +179,7 @@ Window {
 
                     signal connectToSerial()
 
-                    onClicked: connect_serial.connectToSerial()
+                    onClicked: serial.connect_to_serial()
                 }
 
                 ComboBox {
@@ -191,9 +191,7 @@ Window {
                     model: ["1","2"]
                     width: 200
 
-                    signal serialSelected(id: int )
-
-                    onCurrentIndexChanged: serial_select.serialSelected( serial_select.currentIndex )
+                    onCurrentIndexChanged: serial.serial_selected(serial_select.currentIndex)
 
                     Connections
                     {
@@ -215,13 +213,14 @@ Window {
 
                 Connections
                 {
-                    function onConnected()
+                    target: serial
+                    function onSerialConnected()
                     {
                         serial_status.text = "Connected"
                         serial_status.color = "green"
                     }
 
-                    function onDisconnected()
+                    function onSerialDisconnected()
                     {
                         serial_status.text = "Disconnected"
                         serial_status.color = "red"

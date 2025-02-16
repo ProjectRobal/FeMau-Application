@@ -27,5 +27,7 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
     engine.loadFromModule("FeMauApp", "Main");
 
+    serial_interface.scan_for_serial();
+
     return app.exec();
 }

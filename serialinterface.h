@@ -10,6 +10,9 @@
 #include <QList>
 #include <QString>
 
+#include <QDebug>
+
+
 class SerialInterface : public QObject
 {
     Q_OBJECT
@@ -19,6 +22,10 @@ class SerialInterface : public QObject
 
     size_t device_index;
 
+    QSerialPort serial;
+
+    bool connected;
+
 public:
     explicit SerialInterface(QObject *parent = nullptr);
 
@@ -26,6 +33,34 @@ public:
 public slots:
 
     void scan_for_serial();
+
+    void connect_to_serial();
+
+    void serial_selected(size_t device_index);
+
+    void serial_data_ready();
+
+    void on_serial_error(QSerialPort::SerialPortError error)
+    {
+        if( error == QSerialPort::SerialPortError::NoError )
+        {
+            return;
+        }
+
+        this->emitDisconnected();
+
+        qDebug()<<"Serial error ocurred"<<error;
+    }
+
+    void emitConnected()
+    {
+        emit this->serialConnected();
+    }
+
+    void emitDisconnected()
+    {
+        emit this->serialDisconcted();
+    }
 
 signals:
 
