@@ -65,7 +65,42 @@ Window {
 
                     function onGot_current_temperature(_temperature: float)
                     {
-                        temperature.text = Math.floor(_temperature) + " °C";
+                        _temperature = Math.floor(_temperature);
+
+                        temperature.text = _temperature + " °C";
+
+                        var series = chart.series(0);
+
+                        if( series.count === 0 )
+                        {
+                            chart.startTime = Date.now();
+                        }
+
+                        let timestamp = Date.now() - chart.startTime;
+
+                        console.log("Timestamp: "+chart.startTime+" ms");
+                        console.log("Timestamp: "+timestamp+" ms");
+
+                        console.log(series);
+
+                        if( series.count > 100000 )
+                        {
+                            chart.startTime = Date.now();
+                            series.clear();
+                        }
+
+                        series.append(timestamp,_temperature);
+
+                        axisX.max = timestamp;
+                        axisX.min = series.at(0).x
+
+                        chart.update();
+
+                        chart.seriesAdded(series)
+
+                        // series.replace(series.count - 1, timestamp, _temperature);
+
+                        console.log("Series count: ",chart.series(0).count);
                     }
                 }
             }
@@ -247,8 +282,6 @@ Window {
                     text: "Connect"
                     font: defFont
 
-                    signal connectToSerial()
-
                     onClicked: serial.connect_to_serial()
                 }
 
@@ -325,7 +358,7 @@ Window {
 
                 id: chart
 
-                property int startTime: Date.now();
+                property var startTime: Date.now();
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -333,50 +366,34 @@ Window {
 
                 antialiasing: true
 
-
                 ValueAxis
                 {
                     id: axisY
+                    min: 0
+                    max: 500
                     titleText:"Temperature [&deg;C]"
                 }
 
                 ValueAxis
                 {
                     id: axisX
+                    min: 0
+                    max: 5000000
                     titleText:"Time [ms]"
                 }
 
                 LineSeries {
                     name: "Temperature"
-                    objectName:"temperatureSeries"
 
                     id: temperature_series
 
                     axisX: axisX
                     axisY: axisY
 
-                    XYPoint { x: 0; y: 0 }
-                    XYPoint { x: 10; y: 20 }
+                    // XYPoint { x: 0; y: 0 }
+                    // XYPoint { x: 10; y: 20 }
                 }
 
-                Connections
-                {
-                    target: term
-
-                    function onGot_current_temperature(temperature: float)
-                    {
-                        let timestamp = Date.now() - chart.startTime;
-
-                        var series = chart.series(0);
-
-                        if( series.count > 100000 )
-                        {
-                            series.clear();
-                        }
-
-                        series.append(timestamp,temperature);
-                    }
-                }
             }
 
             MessageDialog {

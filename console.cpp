@@ -4,9 +4,11 @@
 
 #include <memory.h>
 
+#include <QDebug>
+
 static bool compare(const char* s1,const char* s2)
 {
-    return strncmp(s1,s1,BUFFER_SIZE) == 0;
+    return strncmp(s1,s2,BUFFER_SIZE) == 0;
 }
 
 Console::Console(QObject *parent)
@@ -22,10 +24,12 @@ void Console::process(char byte)
     {
         if( extract_header )
         {
+            qDebug()<<"Header cleared";
             memset(header,0,BUFFER_SIZE);
         }
         else
         {
+            qDebug()<<"Value cleared";
             memset(value,0,BUFFER_SIZE);
         }
     }
@@ -40,6 +44,7 @@ void Console::process(char byte)
 
         if( byte == ':' )
         {
+            qDebug()<<"Got header "<<this->header;
             extract_header = false;
             message_iter = 0;
             return;
@@ -51,6 +56,7 @@ void Console::process(char byte)
     {
         if( byte == '\n' || byte == '\r' )
         {
+            qDebug()<<"Got value "<<this->value;
             extract_header = true;
             message_iter = 0;
             this->process_message();
@@ -145,7 +151,7 @@ void Console::process_message()
     {
         uint32_t raw = std::atoi(value);
 
-        float temperature = static_cast<float>(raw)/100.f;
+        float temperature = static_cast<float>(raw)/1000.f;
 
         emit this->got_current_temperature(temperature);
     }
@@ -153,7 +159,7 @@ void Console::process_message()
     {
         uint32_t raw = std::atoi(value);
 
-        float temperature = static_cast<float>(raw)/100.f;
+        float temperature = static_cast<float>(raw)/1000.f;
 
         emit this->got_target_temperature(temperature);
     }
